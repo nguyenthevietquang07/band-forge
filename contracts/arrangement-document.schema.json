@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bandforge.example/schemas/arrangement-document-1.0.0.json",
+  "title": "BandForge ArrangementDocument",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "arrangementId",
+    "versionId",
+    "status",
+    "global",
+    "sourceRefs",
+    "measures",
+    "sectionInstances",
+    "harmony",
+    "tracks",
+    "controls",
+    "locks",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "arrangementId": { "$ref": "#/$defs/id" },
+    "versionId": { "$ref": "#/$defs/id" },
+    "parentVersionId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+    "status": { "enum": ["DRAFT", "CANDIDATE", "ACCEPTED", "ARCHIVED"] },
+    "global": { "$ref": "#/$defs/global" },
+    "sourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRef" }
+    },
+    "measures": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/measure" }
+    },
+    "sectionInstances": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sectionInstance" }
+    },
+    "harmony": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/harmonyEvent" }
+    },
+    "tracks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/track" }
+    },
+    "controls": { "$ref": "#/$defs/controls" },
+    "locks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lock" }
+    },
+    "provenance": { "$ref": "#/$defs/provenance" },
+    "validationSummary": { "$ref": "#/$defs/validationSummary" },
+    "extensions": {
+      "type": "object",
+      "description": "Namespaced additive data. Keys must be reverse-domain names.",
+      "propertyNames": { "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)+$" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 8, "maxLength": 80, "pattern": "^[A-Za-z0-9_-]+$" },
+    "tick": { "type": "integer", "minimum": 0 },
+    "positiveTicks": { "type": "integer", "minimum": 1 },
+    "pitchClass": { "type": "integer", "minimum": 0, "maximum": 11 },
+    "midiPitch": { "type": "integer", "minimum": 0, "maximum": 127 },
+    "timeSignature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator"],
+      "properties": {
+        "numerator": { "type": "integer", "minimum": 1, "maximum": 32 },
+        "denominator": { "enum": [1, 2, 4, 8, 16, 32] }
+      }
+    },
+    "global": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "ticksPerQuarter", "key", "tempoMap", "defaultTimeSignature"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "composer": { "type": ["string", "null"], "maxLength": 300 },
+        "ticksPerQuarter": { "const": 960 },
+        "key": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tonicPitchClass", "mode", "display"],
+          "properties": {
+            "tonicPitchClass": { "$ref": "#/$defs/pitchClass" },
+            "mode": { "enum": ["MAJOR", "MINOR", "DORIAN", "MIXOLYDIAN", "OTHER"] },
+            "display": { "type": "string", "minLength": 1, "maxLength": 32 }
+          }
+        },
+        "tempoMap": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["startTick", "bpm"],
+            "properties": {
+              "startTick": { "$ref": "#/$defs/tick" },
+              "bpm": { "type": "number", "exclusiveMinimum": 20, "maximum": 320 }
+            }
+          }
+        },
+        "defaultTimeSignature": { "$ref": "#/$defs/timeSignature" }
+      }
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceRevisionId", "contentHash", "sourceType", "rightsAttested"],
+      "properties": {
+        "sourceRevisionId": { "$ref": "#/$defs/id" },
+        "contentHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "sourceType": { "enum": ["STRUCTURED", "CHORD_TEXT", "CHORDPRO", "MUSICXML", "MIDI", "PDF", "IMAGE"] },
+        "rightsAttested": { "const": true }
+      }
+    },
+    "measure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ordinal", "startTick", "durationTicks", "timeSignature"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "ordinal": { "type": "integer", "minimum": 1 },
+        "startTick": { "$ref": "#/$defs/tick" },
+        "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+        "timeSignature": { "$ref": "#/$defs/timeSignature" },
+        "rehearsalMark": { "type": ["string", "null"], "maxLength": 40 },
+        "isPickup": { "type": "boolean", "default": false }
+      }
+    },
+    "sectionInstance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "label", "startMeasureId", "endMeasureId", "energy", "density"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "enum": ["INTRO", "VERSE", "PRECHORUS", "CHORUS", "BRIDGE", "SOLO", "BREAKDOWN", "OUTRO", "OTHER"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "startMeasureId": { "$ref": "#/$defs/id" },
+        "endMeasureId": { "$ref": "#/$defs/id" },
+        "energy": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "density": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "harmonyEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "startTick", "durationTicks", "rootPitchClass", "quality", "displaySymbol", "isLocked", "provenance"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "startTick": { "$ref": "#/$defs/tick" },
+        "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+        "rootPitchClass": { "$ref": "#/$defs/pitchClass" },
+        "bassPitchClass": { "oneOf": [{ "$ref": "#/$defs/pitchClass" }, { "type": "null" }] },
+        "quality": { "enum": ["MAJOR", "MINOR", "DIMINISHED", "AUGMENTED", "SUS2", "SUS4", "POWER", "OTHER"] },
+        "extensions": { "type": "array", "items": { "enum": ["6", "7", "MAJ7", "9", "11", "13", "ADD9", "B5", "S5", "B9", "S9"] }, "uniqueItems": true },
+        "displaySymbol": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "romanNumeral": { "type": ["string", "null"], "maxLength": 32 },
+        "isLocked": { "type": "boolean" },
+        "provenance": { "enum": ["USER", "IMPORT", "INFERENCE", "REHARMONIZATION"] },
+        "sourceHarmonyEventId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] }
+      }
+    },
+    "track": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "instrument", "playerLevel", "writtenRange", "soundingRange", "maxPolyphony", "roles", "events"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "instrument": { "enum": ["DRUMS", "BASS", "GUITAR", "KEYS", "LEAD", "VOICE", "OTHER"] },
+        "playerLevel": { "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED"] },
+        "writtenRange": { "$ref": "#/$defs/pitchRange" },
+        "soundingRange": { "$ref": "#/$defs/pitchRange" },
+        "transpositionSemitones": { "type": "integer", "minimum": -36, "maximum": 36, "default": 0 },
+        "maxPolyphony": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "midiProgram": { "type": ["integer", "null"], "minimum": 0, "maximum": 127 },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["sectionInstanceId", "role"],
+            "properties": {
+              "sectionInstanceId": { "$ref": "#/$defs/id" },
+              "role": { "enum": ["FOUNDATION", "PULSE", "COMP", "PAD", "MELODY_SUPPORT", "COUNTERLINE", "FILL", "REST"] }
+            }
+          }
+        },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+      }
+    },
+    "pitchRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "$ref": "#/$defs/midiPitch" },
+        "maximum": { "$ref": "#/$defs/midiPitch" }
+      }
+    },
+    "event": {
+      "oneOf": [
+        { "$ref": "#/$defs/noteEvent" },
+        { "$ref": "#/$defs/chordEvent" },
+        { "$ref": "#/$defs/drumEvent" },
+        { "$ref": "#/$defs/restEvent" },
+        { "$ref": "#/$defs/directionEvent" }
+      ]
+    },
+    "baseTimedEvent": {
+      "type": "object",
+      "required": ["id", "type", "startTick", "durationTicks"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "type": "string" },
+        "startTick": { "$ref": "#/$defs/tick" },
+        "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+        "performanceOffsetTicks": { "type": "integer", "minimum": -240, "maximum": 240, "default": 0 },
+        "performanceDurationDeltaTicks": { "type": "integer", "minimum": -240, "maximum": 240, "default": 0 }
+      }
+    },
+    "noteEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/baseTimedEvent" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "type", "startTick", "durationTicks", "writtenPitch", "soundingPitch", "velocity"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" }, "type": { "const": "NOTE" }, "startTick": { "$ref": "#/$defs/tick" }, "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+            "writtenPitch": { "$ref": "#/$defs/midiPitch" }, "soundingPitch": { "$ref": "#/$defs/midiPitch" }, "velocity": { "type": "integer", "minimum": 1, "maximum": 127 },
+            "performanceOffsetTicks": { "type": "integer", "minimum": -240, "maximum": 240 }, "performanceDurationDeltaTicks": { "type": "integer", "minimum": -240, "maximum": 240 },
+            "articulation": { "enum": ["NORMAL", "STACCATO", "TENUTO", "ACCENT", "GHOST"] }, "tie": { "enum": ["NONE", "START", "STOP", "CONTINUE"] }
+          }
+        }
+      ]
+    },
+    "chordEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/baseTimedEvent" },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["id", "type", "startTick", "durationTicks", "writtenPitches", "soundingPitches", "velocity"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" }, "type": { "const": "CHORD" }, "startTick": { "$ref": "#/$defs/tick" }, "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+            "writtenPitches": { "type": "array", "minItems": 2, "maxItems": 16, "items": { "$ref": "#/$defs/midiPitch" } },
+            "soundingPitches": { "type": "array", "minItems": 2, "maxItems": 16, "items": { "$ref": "#/$defs/midiPitch" } },
+            "velocity": { "type": "integer", "minimum": 1, "maximum": 127 },
+            "performanceOffsetTicks": { "type": "integer", "minimum": -240, "maximum": 240 }, "performanceDurationDeltaTicks": { "type": "integer", "minimum": -240, "maximum": 240 },
+            "shapeId": { "type": ["string", "null"], "maxLength": 100 }
+          }
+        }
+      ]
+    },
+    "drumEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/baseTimedEvent" },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["id", "type", "startTick", "durationTicks", "kitPiece", "velocity"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" }, "type": { "const": "DRUM_HIT" }, "startTick": { "$ref": "#/$defs/tick" }, "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+            "kitPiece": { "enum": ["KICK", "SNARE", "CLOSED_HAT", "OPEN_HAT", "RIDE", "CRASH", "LOW_TOM", "MID_TOM", "HIGH_TOM", "PERCUSSION"] },
+            "velocity": { "type": "integer", "minimum": 1, "maximum": 127 },
+            "performanceOffsetTicks": { "type": "integer", "minimum": -240, "maximum": 240 }, "performanceDurationDeltaTicks": { "type": "integer", "minimum": -240, "maximum": 240 }
+          }
+        }
+      ]
+    },
+    "restEvent": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "type", "startTick", "durationTicks"],
+      "properties": { "id": { "$ref": "#/$defs/id" }, "type": { "const": "REST" }, "startTick": { "$ref": "#/$defs/tick" }, "durationTicks": { "$ref": "#/$defs/positiveTicks" } }
+    },
+    "directionEvent": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "type", "startTick", "durationTicks", "kind", "value"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "type": { "const": "DIRECTION" }, "startTick": { "$ref": "#/$defs/tick" }, "durationTicks": { "$ref": "#/$defs/positiveTicks" },
+        "kind": { "enum": ["DYNAMIC", "REHEARSAL", "TEXT", "PEDAL", "CUE"] }, "value": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    },
+    "controls": {
+      "type": "object", "additionalProperties": false,
+      "required": ["stylePackId", "feel", "density", "harmonicAdventurousness", "variationMode"],
+      "properties": {
+        "stylePackId": { "type": "string", "pattern": "^[a-z0-9-]+@[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "feel": { "enum": ["STRAIGHT", "SWING", "SHUFFLE", "HALF_TIME", "DOUBLE_TIME"] },
+        "swingRatio": { "type": ["number", "null"], "minimum": 1, "maximum": 3 },
+        "density": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "harmonicAdventurousness": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "variationMode": { "enum": ["SAFE", "FRESH", "REHARMONIZE", "SIMPLIFY", "SPICE_UP"] }
+      }
+    },
+    "lock": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "enum": ["HARMONY", "MELODY", "SECTION_ORDER", "TRACK", "SECTION_TRACK", "MEASURE_RANGE", "EVENTS"] },
+        "trackIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "sectionInstanceIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "startMeasureId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+        "endMeasureId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+        "eventIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true }
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["createdBy", "createdAt", "engineVersion", "validatorVersion"],
+      "properties": {
+        "createdBy": { "enum": ["USER", "IMPORTER", "GENERATOR", "REPAIRER"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "engineVersion": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "validatorVersion": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "seed": { "type": ["integer", "null"], "minimum": 0 },
+        "modelId": { "type": ["string", "null"], "maxLength": 200 },
+        "promptVersion": { "type": ["string", "null"], "maxLength": 100 },
+        "retrievalItemIds": { "type": "array", "items": { "$ref": "#/$defs/id" }, "uniqueItems": true },
+        "fallbackUsed": { "type": "boolean", "default": false }
+      }
+    },
+    "validationSummary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["runId", "status", "errorCount", "warningCount"],
+      "properties": {
+        "runId": { "$ref": "#/$defs/id" },
+        "status": { "enum": ["NOT_RUN", "INVALID", "VALID_WITH_WARNINGS", "VALID"] },
+        "errorCount": { "type": "integer", "minimum": 0 },
+        "warningCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

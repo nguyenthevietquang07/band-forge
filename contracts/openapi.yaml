@@ -1,0 +1,738 @@
+openapi: 3.1.0
+info:
+  title: BandForge API
+  version: 1.0.0-draft
+  description: Contract-first API for source approval, generation jobs, candidate review, and export.
+servers:
+  - url: /v1
+security:
+  - sessionCookie: []
+paths:
+  /songs:
+    get:
+      operationId: listSongs
+      parameters:
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageToken'
+      responses:
+        '200':
+          description: Paginated songs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SongPage'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createSong
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSongRequest'
+      responses:
+        '201':
+          description: Song created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+        default:
+          $ref: '#/components/responses/Error'
+  /songs/{songId}/sources:
+    get:
+      operationId: listSongSources
+      parameters:
+        - $ref: '#/components/parameters/SongId'
+      responses:
+        '200':
+          description: Source revisions in creation order for editor rehydration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceRevisionPage'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      operationId: createSongSource
+      parameters:
+        - $ref: '#/components/parameters/SongId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSourceRequest'
+      responses:
+        '201':
+          description: Source/import resource created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceRevision'
+        default:
+          $ref: '#/components/responses/Error'
+  /source-revisions/{sourceRevisionId}/approval:
+    post:
+      operationId: approveSourceRevision
+      parameters:
+        - $ref: '#/components/parameters/SourceRevisionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [rightsAttested]
+              properties:
+                rightsAttested:
+                  type: boolean
+                  description: Must be true; false is rejected with RIGHTS_ATTESTATION_REQUIRED.
+      responses:
+        '200':
+          description: Approved immutable source revision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceRevision'
+        default:
+          $ref: '#/components/responses/Error'
+  /source-revisions/{sourceRevisionId}:
+    get:
+      operationId: getSourceRevision
+      parameters:
+        - $ref: '#/components/parameters/SourceRevisionId'
+      responses:
+        '200':
+          description: Immutable structured source revision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceRevision'
+        default:
+          $ref: '#/components/responses/Error'
+  /source-revisions/{sourceRevisionId}/chart-export:
+    get:
+      operationId: exportApprovedChart
+      parameters:
+        - $ref: '#/components/parameters/SourceRevisionId'
+      responses:
+        '200':
+          description: Deterministic printable HTML chart for an approved source revision
+          content:
+            text/html:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/Error'
+  /songs/{songId}/arrangements:
+    post:
+      operationId: createArrangement
+      parameters:
+        - $ref: '#/components/parameters/SongId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [sourceRevisionId, title]
+              properties:
+                sourceRevisionId:
+                  type: string
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+      responses:
+        '201':
+          description: Arrangement and initial draft created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Arrangement'
+        default:
+          $ref: '#/components/responses/Error'
+  /arrangements/{arrangementId}/generation-jobs:
+    post:
+      operationId: createGenerationJob
+      parameters:
+        - $ref: '#/components/parameters/ArrangementId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGenerationJobRequest'
+      responses:
+        '202':
+          description: Generation job accepted
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        default:
+          $ref: '#/components/responses/Error'
+  /generation-jobs/{jobId}:
+    get:
+      operationId: getGenerationJob
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Durable job state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        default:
+          $ref: '#/components/responses/Error'
+  /generation-jobs/{jobId}/events:
+    get:
+      operationId: streamGenerationJobEvents
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+        - name: Last-Event-ID
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reconnectable progress event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/Error'
+  /generation-jobs/{jobId}/cancellation:
+    post:
+      operationId: cancelGenerationJob
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: Cancellation requested or job already terminal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        default:
+          $ref: '#/components/responses/Error'
+  /generation-jobs/{jobId}/candidates:
+    get:
+      operationId: listGenerationCandidates
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Ranked valid candidates and rejection summary
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Candidate'
+        default:
+          $ref: '#/components/responses/Error'
+  /generation-candidates/{candidateId}/selection:
+    post:
+      operationId: selectGenerationCandidate
+      parameters:
+        - name: candidateId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Candidate forked into current draft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementVersion'
+        default:
+          $ref: '#/components/responses/Error'
+  /arrangement-versions/{versionId}/acceptance:
+    post:
+      operationId: acceptArrangementVersion
+      parameters:
+        - $ref: '#/components/parameters/VersionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Immutable accepted arrangement version
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementVersion'
+        default:
+          $ref: '#/components/responses/Error'
+  /arrangement-versions/{versionId}/candidates:
+    post:
+      operationId: createArrangementVersionCandidate
+      parameters:
+        - $ref: '#/components/parameters/VersionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCandidateProjectionRequest'
+      responses:
+        '200':
+          description: Accepted deterministic candidate projection for local playback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateProjection'
+        default:
+          $ref: '#/components/responses/Error'
+  /arrangement-versions/{versionId}/playback-plan:
+    post:
+      operationId: createArrangementVersionPlaybackPlan
+      parameters:
+        - $ref: '#/components/parameters/VersionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaybackPlanRequest'
+      responses:
+        '200':
+          description: Canonical playback projection for an accepted deterministic candidate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaybackPlanProjection'
+        default:
+          $ref: '#/components/responses/Error'
+  /arrangement-versions/{versionId}/export-jobs:
+    post:
+      operationId: createExportJob
+      parameters:
+        - $ref: '#/components/parameters/VersionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [formats]
+              properties:
+                formats:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    enum: [MUSICXML, MIDI, FULL_SCORE_PDF, PLAYER_PDFS, CHORD_CHART_PDF, SETLIST_ZIP]
+      responses:
+        '202':
+          description: Export job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: bandforge_session
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 200
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    PageToken:
+      name: pageToken
+      in: query
+      required: false
+      schema:
+        type: string
+    SongId:
+      name: songId
+      in: path
+      required: true
+      schema: { type: string }
+    SourceRevisionId:
+      name: sourceRevisionId
+      in: path
+      required: true
+      schema: { type: string }
+    ArrangementId:
+      name: arrangementId
+      in: path
+      required: true
+      schema: { type: string }
+    VersionId:
+      name: versionId
+      in: path
+      required: true
+      schema: { type: string }
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Error:
+      description: Structured API error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, requestId]
+          properties:
+            code: { type: string, pattern: '^[A-Z][A-Z0-9_]+$' }
+            message: { type: string }
+            requestId: { type: string }
+            details: {}
+    CreateSongRequest:
+      type: object
+      additionalProperties: false
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 300 }
+        artist: { type: [string, 'null'], maxLength: 300 }
+        metadataProviderId: { type: [string, 'null'] }
+    Song:
+      type: object
+      additionalProperties: false
+      required: [id, title, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        artist: { type: [string, 'null'] }
+        metadataProviderId: { type: [string, 'null'] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SongPage:
+      type: object
+      additionalProperties: false
+      required: [data, nextPageToken]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Song' }
+        nextPageToken: { type: [string, 'null'] }
+    CreateSourceRequest:
+      type: object
+      additionalProperties: false
+      required: [sourceType, rightsAttested, content]
+      properties:
+        sourceType:
+          enum: [STRUCTURED]
+        rightsAttested: { const: true }
+        content:
+          type: object
+          additionalProperties: false
+          required: [key, bars]
+          properties:
+            key: { type: string, pattern: '^[A-G]_(MAJOR|MINOR)$' }
+            bars:
+              type: array
+              minItems: 1
+              maxItems: 256
+              items: { type: string, minLength: 1, maxLength: 64 }
+    SourceRevision:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - songId
+        - sourceType
+        - contentHash
+        - rightsAttested
+        - status
+        - content
+        - findings
+        - createdAt
+      properties:
+        id: { type: string }
+        songId: { type: string }
+        sourceType: { const: STRUCTURED }
+        contentHash: { type: string, pattern: '^sha256:[0-9a-f]{64}$' }
+        rightsAttested: { const: true }
+        status: { enum: [DRAFT, APPROVED] }
+        content:
+          type: object
+          additionalProperties: false
+          required: [key, bars]
+          properties:
+            key: { type: string, pattern: '^[A-G]_(MAJOR|MINOR)$' }
+            bars:
+              type: array
+              minItems: 1
+              maxItems: 256
+              items: { type: string, minLength: 1, maxLength: 64 }
+        findings:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [code, message, barOrdinal]
+            properties:
+              code: { type: string }
+              message: { type: string }
+              barOrdinal: { type: integer, minimum: 1 }
+        createdAt: { type: string, format: date-time }
+    SourceRevisionPage:
+      type: object
+      additionalProperties: false
+      required: [data, nextPageToken]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/SourceRevision' }
+        nextPageToken: { type: 'null' }
+    Arrangement:
+      type: object
+      additionalProperties: false
+      required: [id, songId, title, currentDraftVersionId, acceptedVersionId, createdAt]
+      properties:
+        id: { type: string }
+        songId: { type: string }
+        title: { type: string, minLength: 1, maxLength: 300 }
+        currentDraftVersionId: { type: string }
+        acceptedVersionId: { type: [string, 'null'] }
+        createdAt: { type: string, format: date-time }
+    ArrangementVersion:
+      type: object
+      additionalProperties: false
+      required: [id, arrangementId, status, contentHash, createdAt]
+      properties:
+        id: { type: string }
+        arrangementId: { type: string }
+        parentVersionId: { type: [string, 'null'] }
+        status: { enum: [DRAFT, CANDIDATE, ACCEPTED, ARCHIVED] }
+        contentHash: { type: string, pattern: '^sha256:[0-9a-f]{64}$' }
+        validationStatus: { enum: [NOT_RUN, INVALID, VALID_WITH_WARNINGS, VALID] }
+        createdAt: { type: string, format: date-time }
+    CreateCandidateProjectionRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        seed: { type: integer, minimum: 0, default: 0 }
+        tempoBpm: { type: integer, minimum: 40, maximum: 240, default: 104 }
+    GenerationLineage:
+      type: object
+      additionalProperties: false
+      required: [seed, engineVersion, stylePackVersion, validatorVersion, inputRevisionSet, provenance]
+      properties:
+        seed: { type: integer, minimum: 0 }
+        engineVersion: { type: string }
+        stylePackVersion: { type: string }
+        validatorVersion: { type: string }
+        inputRevisionSet:
+          type: array
+          minItems: 1
+          items: { type: string }
+        provenance: { type: string }
+    CandidateProjection:
+      type: object
+      additionalProperties: false
+      required: [candidateId, accepted, rightsAttested, lineage, validatorVersion, candidate]
+      properties:
+        candidateId: { type: string }
+        accepted: { const: true }
+        rightsAttested: { const: true }
+        validatorVersion: { type: string }
+        lineage:
+          $ref: '#/components/schemas/GenerationLineage'
+        candidate:
+          type: object
+          description: Canonical candidate document used by the local preview scheduler.
+          additionalProperties: true
+    PlaybackPlanRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        seed: { type: integer, minimum: 0, default: 0 }
+        tempoBpm: { type: integer, minimum: 40, maximum: 220, default: 104 }
+        mutedTrackIds:
+          type: array
+          uniqueItems: true
+          items: { type: string }
+        soloTrackIds:
+          type: array
+          uniqueItems: true
+          items: { type: string }
+        loopStartMeasureId: { type: [string, 'null'] }
+        loopEndMeasureId: { type: [string, 'null'] }
+        metronome: { type: boolean, default: false }
+        countInBars: { type: integer, minimum: 0, maximum: 4, default: 0 }
+        tempoOverrideBpm: { type: [integer, 'null'], minimum: 40, maximum: 220 }
+    PlaybackPlanProjection:
+      type: object
+      additionalProperties: false
+      required:
+        - candidateVersionId
+        - accepted
+        - rightsAttested
+        - lineage
+        - tempoBpm
+        - activeTrackIds
+        - loopStartTick
+        - loopEndTick
+        - metronome
+        - countInBars
+        - events
+      properties:
+        candidateVersionId: { type: string }
+        accepted: { const: true }
+        rightsAttested: { const: true }
+        lineage:
+          $ref: '#/components/schemas/GenerationLineage'
+        tempoBpm: { type: integer, minimum: 40, maximum: 220 }
+        activeTrackIds:
+          type: array
+          uniqueItems: true
+          items: { type: string }
+        loopStartTick: { type: integer }
+        loopEndTick: { type: integer, minimum: 1 }
+        metronome: { type: boolean }
+        countInBars: { type: integer, minimum: 0, maximum: 4 }
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [trackId, eventId, kind, startTick, durationTicks, pitches, velocity]
+            properties:
+              trackId: { type: string }
+              eventId: { type: string }
+              kind: { enum: [NOTE, CHORD, DRUM_HIT, CLICK] }
+              startTick: { type: integer }
+              durationTicks: { type: integer, minimum: 1 }
+              pitches:
+                type: array
+                items: { type: integer, minimum: 0, maximum: 127 }
+              velocity: { type: integer, minimum: 1, maximum: 127 }
+    CreateGenerationJobRequest:
+      type: object
+      additionalProperties: false
+      required: [baseVersionId, sourceRevisionId, candidateCount, mode, controls]
+      properties:
+        baseVersionId: { type: string }
+        sourceRevisionId: { type: string }
+        candidateCount: { type: integer, minimum: 1, maximum: 3 }
+        seed: { type: [integer, 'null'], minimum: 0 }
+        mode: { enum: [SAFE, FRESH, REHARMONIZE, SIMPLIFY, SPICE_UP] }
+        scope:
+          $ref: '#/components/schemas/GenerationScope'
+        controls:
+          type: object
+          additionalProperties: false
+          required: [stylePackId, tempoBpm, feel, density, harmonicAdventurousness]
+          properties:
+            stylePackId: { type: string }
+            tempoBpm: { type: number, exclusiveMinimum: 20, maximum: 320 }
+            feel: { enum: [STRAIGHT, SWING, SHUFFLE, HALF_TIME, DOUBLE_TIME] }
+            density: { type: integer, minimum: 1, maximum: 5 }
+            harmonicAdventurousness: { type: integer, minimum: 0, maximum: 3 }
+    GenerationScope:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type: { enum: [FULL, TRACKS, SECTIONS, SECTION_TRACKS, MEASURE_RANGE] }
+        trackIds:
+          type: array
+          uniqueItems: true
+          items: { type: string }
+        sectionInstanceIds:
+          type: array
+          uniqueItems: true
+          items: { type: string }
+        startMeasureId: { type: [string, 'null'] }
+        endMeasureId: { type: [string, 'null'] }
+    Job:
+      type: object
+      additionalProperties: false
+      required: [id, type, status, progress, attempt, createdAt]
+      properties:
+        id: { type: string }
+        type: { enum: [IMPORT, GENERATION, VALIDATION, RENDER, EXPORT] }
+        status: { enum: [QUEUED, RUNNING, RETRY_WAIT, STALE, CANCELLING, CANCELLED, SUCCEEDED, FAILED] }
+        progress:
+          type: object
+          additionalProperties: false
+          required: [phase, completedUnits, totalUnits, percent]
+          properties:
+            phase: { type: string }
+            completedUnits: { type: integer, minimum: 0 }
+            totalUnits: { type: integer, minimum: 0 }
+            percent: { type: integer, minimum: 0, maximum: 100 }
+        attempt: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        startedAt: { type: [string, 'null'], format: date-time }
+        finishedAt: { type: [string, 'null'], format: date-time }
+        result: { type: [object, 'null'] }
+        failure:
+          oneOf:
+            - type: 'null'
+            - $ref: '#/components/schemas/ErrorEnvelope'
+    Candidate:
+      type: object
+      additionalProperties: false
+      required: [id, versionId, rank, seed, score, validationStatus, warningCount]
+      properties:
+        id: { type: string }
+        versionId: { type: string }
+        rank: { type: integer, minimum: 1 }
+        seed: { type: integer, minimum: 0 }
+        score: { type: number, minimum: 0, maximum: 1 }
+        validationStatus: { enum: [VALID, VALID_WITH_WARNINGS] }
+        warningCount: { type: integer, minimum: 0 }
+        differenceSummary:
+          type: array
+          items: { type: string }

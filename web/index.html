@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BandForge / Source editor</title>
+    <link rel="stylesheet" href="editor.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">BANDFORGE · SOURCE WORKSPACE</p>
+          <h1>Make the chart unambiguous.</h1>
+          <p class="lede">Enter material you own or are licensed to use. BandForge will review the chart you provide; it will not recover chords from a title.</p>
+        </div>
+        <label class="api-field">API base
+          <input id="api-base" type="url" value="http://127.0.0.1:8011" spellcheck="false">
+        </label>
+      </header>
+
+      <section class="workspace-grid" aria-label="Structured source editor">
+        <div class="editor-column">
+          <section class="card source-card">
+            <div class="section-heading">
+              <div><span class="step">01</span><h2>Describe the source</h2></div>
+              <span id="source-status" class="pill draft">Draft</span>
+            </div>
+            <div class="form-grid">
+              <label>Song title<input id="song-title" required maxlength="300" placeholder="An original rehearsal chart"></label>
+              <label>Artist / band<input id="song-artist" maxlength="300" placeholder="Optional metadata"></label>
+              <label>Metadata provider ID<input id="metadata-provider-id" maxlength="300" placeholder="Optional metadata only"></label>
+              <label>Key<select id="chart-key"><option value="A_MINOR">A minor</option><option value="C_MAJOR">C major</option><option value="G_MAJOR">G major</option><option value="D_MAJOR">D major</option><option value="E_MINOR">E minor</option></select></label>
+            </div>
+            <label class="rights-row"><input id="rights-attested" type="checkbox"> I own or am licensed to use this musical source.</label>
+          </section>
+
+          <section class="card chart-card">
+            <div class="section-heading">
+              <div><span class="step">02</span><h2>Shape the four-bar grid</h2></div>
+              <span class="meter">4/4 · 960 ticks / quarter</span>
+            </div>
+            <p class="helper">One chord per bar keeps the first review surface explicit. Use the keyboard to move between cells.</p>
+            <div id="bar-grid" class="bar-grid" role="group" aria-label="Chord bars"></div>
+            <div class="chart-actions"><button id="add-bar" class="button secondary" type="button">+ Add bar</button><button id="remove-bar" class="button ghost" type="button">Remove last</button><button id="submit-source" class="button primary" type="button">Review source</button></div>
+          </section>
+
+          <section id="review-panel" class="card review-card" hidden>
+            <div class="section-heading"><div><span class="step">03</span><h2>Review before locking</h2></div><span id="review-status" class="pill review">Needs review</span></div>
+            <div id="findings" class="findings" aria-live="polite"></div>
+            <div class="review-actions"><button id="approve-source" class="button primary" type="button" disabled>Approve source</button><button id="create-arrangement" class="button secondary" type="button" disabled>Create locked seed</button></div>
+            <p id="approval-note" class="helper">Blocking findings must be resolved and the rights attestation must remain checked.</p>
+          </section>
+
+          <section id="playback-panel" class="card playback-card">
+            <div class="section-heading"><div><span class="step">04</span><h2>Preview an accepted candidate</h2></div><span class="pill draft">Local only</span></div>
+            <p class="helper">Playback is available only after the approved, rights-attested source produces a hard-validated deterministic candidate. No metadata or streaming service supplies notes.</p>
+            <dl id="candidate-summary" class="facts candidate-summary"><div><dt>Candidate</dt><dd id="candidate-id">Not generated</dd></div><div><dt>Validator</dt><dd id="candidate-validator">Not generated</dd></div><div><dt>Source rights</dt><dd id="candidate-rights">Not verified</dd></div></dl>
+            <div class="playback-actions"><button id="play-preview" class="button primary" type="button" disabled>Play preview</button><button id="stop-preview" class="button ghost" type="button">Stop</button><span id="playback-status" class="helper" role="status" aria-live="polite">Waiting for an accepted candidate.</span></div>
+            <div class="playback-grid">
+              <label>Loop start measure<input id="loop-start" type="number" min="1" max="64" value="1"></label>
+              <label>Loop end measure<input id="loop-end" type="number" min="1" max="64" value="4"></label>
+              <label>Tempo override (BPM)<input id="tempo-override" type="number" min="40" max="220" value="104"></label>
+              <label>Count-in bars<input id="count-in" type="number" min="0" max="4" value="0"></label>
+            </div>
+            <label class="check-row"><input id="metronome" type="checkbox"> Metronome clicks</label>
+            <div class="track-controls" aria-label="Preview track controls">
+              <div class="track-control-heading"><span>Track</span><span>Mute</span><span>Solo</span></div>
+              <div class="track-control-row"><span>Drums</span><input id="track-mute-generated-drums" data-track-id="generated_drums" data-mode="mute" aria-label="Mute drums" type="checkbox"><input id="track-solo-generated-drums" data-track-id="generated_drums" data-mode="solo" aria-label="Solo drums" type="checkbox"></div>
+              <div class="track-control-row"><span>Bass</span><input id="track-mute-generated-bass" data-track-id="generated_bass" data-mode="mute" aria-label="Mute bass" type="checkbox"><input id="track-solo-generated-bass" data-track-id="generated_bass" data-mode="solo" aria-label="Solo bass" type="checkbox"></div>
+              <div class="track-control-row"><span>Guitar</span><input id="track-mute-generated-guitar" data-track-id="generated_guitar" data-mode="mute" aria-label="Mute guitar" type="checkbox"><input id="track-solo-generated-guitar" data-track-id="generated_guitar" data-mode="solo" aria-label="Solo guitar" type="checkbox"></div>
+              <div class="track-control-row"><span>Keys</span><input id="track-mute-generated-keys" data-track-id="generated_keys" data-mode="mute" aria-label="Mute keys" type="checkbox"><input id="track-solo-generated-keys" data-track-id="generated_keys" data-mode="solo" aria-label="Solo keys" type="checkbox"></div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side-column">
+          <section class="card status-card"><p class="eyebrow">LIVE STATUS</p><p id="request-status" class="status-message" aria-live="polite">Ready for a user-authored chart.</p><dl class="facts"><div><dt>Song</dt><dd id="song-id">Not created</dd></div><div><dt>Revision</dt><dd id="revision-id">None</dd></div><div><dt>Ticks / quarter</dt><dd>960</dd></div></dl></section>
+          <section class="card history-card"><div class="section-heading"><h2>Revision history</h2></div><ol id="revision-history" class="history"><li class="empty">No source revision yet.</li></ol></section>
+          <section id="locked-card" class="card locked-card" hidden><p class="eyebrow">CANONICAL STATE</p><h2>Source-locked seed</h2><p class="locked-copy">This immutable seed preserves the approved source. A hard-validated candidate projection is loaded separately for local playback.</p><dl class="facts"><div><dt>Arrangement</dt><dd id="arrangement-id"></dd></div><div><dt>Version</dt><dd id="version-id"></dd></div><div><dt>Locks</dt><dd id="lock-summary"></dd></div></dl><span class="pill source-locked">Source harmony locked</span></section>
+        </aside>
+      </section>
+    </main>
+    <script type="module" src="editor.js"></script>
+  </body>
+</html>

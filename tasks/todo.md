@@ -1,0 +1,22 @@
+# BandForge Foundation Slice Tasks
+
+- [x] Task 1: Runnable Python workspace
+- [x] Task 2: Chord parser and chart timeline
+- [x] Task 3: Arrangement seed and schema validation
+- [x] Task 4: Source workflow API and persistence
+- [x] Task 5: SDLC evidence and end-to-end verification
+- [x] Cycle 4 Task 1: Source-to-draft integrity, idempotency, and legacy SQLite compatibility
+- [x] Cycle 4 Task 2: Structured source editor with finding resolution and approval
+- [x] Cycle 4 Task 3: Real HTTP demo evidence and SDLC documentation closure
+- [x] Cycle 5: Approved-source deterministic HTML/print chart export
+- [x] Cycle 6: Deterministic four-piece generator baseline with hard findings and lineage
+- [x] Cycle 6 review fixes and fresh acceptance re-review
+- [x] Cycle 7: Candidate comparison and validator catalog
+- [x] Cycle 8: MIDI artifact validation and SAFE scoped-regeneration preservation
+- [x] Cycle 10: MVP playback controls backed by an accepted candidate
+- [x] Cycle 9: MusicXML notation and player-packet interoperability
+- [x] Roadmap Milestone 2 MVP slice: candidate comparison and validator catalog
+- [ ] Roadmap remainder: style packs beyond the deterministic baseline and playability evidence
+- [ ] Roadmap Milestone 1 remainder: authored chart PDF export
+- [ ] Roadmap remainder outside the approved MVP: job progress/cancellation, later regeneration modes, imports, model planning, evaluation, deployment, and scale readiness
+- [x] Final portfolio-grade MVP broad review and gate evidence

@@ -1,0 +1,16 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.superpowers/
+*.egg-info/
+*.sqlite3
+*.db
+coverage.xml
+htmlcov/
+
+# Local user-supplied event material is not public demo content.
+scripts/run_beauty_and_the_beat_demo.py
+reports/beauty-and-the-beat-*
+reports/beauty-and-the-beat.mid
+reports/beauty-and-the-beat.musicxml

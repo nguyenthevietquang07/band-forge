@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "1.0.0",
+  "arrangementId": "arr_demo_001",
+  "versionId": "arv_demo_001",
+  "parentVersionId": null,
+  "status": "CANDIDATE",
+  "global": {
+    "title": "BandForge Original Demo",
+    "composer": "BandForge fixture",
+    "ticksPerQuarter": 960,
+    "key": {
+      "tonicPitchClass": 7,
+      "mode": "MAJOR",
+      "display": "G major"
+    },
+    "tempoMap": [
+      {
+        "startTick": 0,
+        "bpm": 104
+      }
+    ],
+    "defaultTimeSignature": {
+      "numerator": 4,
+      "denominator": 4
+    }
+  },
+  "sourceRefs": [
+    {
+      "sourceRevisionId": "srcv_demo_001",
+      "contentHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "sourceType": "STRUCTURED",
+      "rightsAttested": true
+    }
+  ],
+  "measures": [
+    {
+      "id": "measure_001",
+      "ordinal": 1,
+      "startTick": 0,
+      "durationTicks": 3840,
+      "timeSignature": {
+        "numerator": 4,
+        "denominator": 4
+      },
+      "rehearsalMark": "A",
+      "isPickup": false
+    }
+  ],
+  "sectionInstances": [
+    {
+      "id": "section_verse_001",
+      "type": "VERSE",
+      "label": "Verse 1",
+      "startMeasureId": "measure_001",
+      "endMeasureId": "measure_001",
+      "energy": 2,
+      "density": 2
+    }
+  ],
+  "harmony": [
+    {
+      "id": "harmony_001",
+      "startTick": 0,
+      "durationTicks": 3840,
+      "rootPitchClass": 7,
+      "bassPitchClass": null,
+      "quality": "MAJOR",
+      "extensions": [],
+      "displaySymbol": "G",
+      "romanNumeral": "I",
+      "isLocked": true,
+      "provenance": "USER",
+      "sourceHarmonyEventId": null
+    }
+  ],
+  "tracks": [
+    {
+      "id": "track_keys_001",
+      "name": "Keyboard",
+      "instrument": "KEYS",
+      "playerLevel": "BEGINNER",
+      "writtenRange": {
+        "minimum": 36,
+        "maximum": 96
+      },
+      "soundingRange": {
+        "minimum": 36,
+        "maximum": 96
+      },
+      "transpositionSemitones": 0,
+      "maxPolyphony": 4,
+      "midiProgram": 0,
+      "roles": [
+        {
+          "sectionInstanceId": "section_verse_001",
+          "role": "PAD"
+        }
+      ],
+      "events": [
+        {
+          "id": "event_chord_001",
+          "type": "CHORD",
+          "startTick": 0,
+          "durationTicks": 3840,
+          "writtenPitches": [55, 59, 62],
+          "soundingPitches": [55, 59, 62],
+          "velocity": 72,
+          "performanceOffsetTicks": 0,
+          "performanceDurationDeltaTicks": 0,
+          "shapeId": null
+        }
+      ]
+    }
+  ],
+  "controls": {
+    "stylePackId": "acoustic-pop@1.0.0",
+    "feel": "STRAIGHT",
+    "swingRatio": null,
+    "density": 2,
+    "harmonicAdventurousness": 0,
+    "variationMode": "SAFE"
+  },
+  "locks": [
+    {
+      "id": "lock_harmony_001",
+      "type": "HARMONY",
+      "trackIds": [],
+      "sectionInstanceIds": ["section_verse_001"],
+      "startMeasureId": "measure_001",
+      "endMeasureId": "measure_001",
+      "eventIds": []
+    }
+  ],
+  "provenance": {
+    "createdBy": "GENERATOR",
+    "createdAt": "2026-07-19T00:00:00Z",
+    "engineVersion": "rules-baseline-0.1.0",
+    "validatorVersion": "rules-0.1.0",
+    "seed": 1001,
+    "modelId": null,
+    "promptVersion": null,
+    "retrievalItemIds": [],
+    "fallbackUsed": false
+  },
+  "validationSummary": {
+    "runId": "validation_demo_001",
+    "status": "VALID",
+    "errorCount": 0,
+    "warningCount": 0
+  },
+  "extensions": {}
+}
