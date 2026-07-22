@@ -7,28 +7,16 @@ Date: 2026-07-22
 **MVP_COMPLETE**
 
 The owner-approved MVP implementation is ready for the final `MVP_COMPLETE`
-claim. The earlier documentation/SDLC findings were closed by the master,
-followed by a fresh verification pass. No production-code defect remains open
-for this MVP scope.
+claim. Earlier documentation findings were closed and followed by a fresh
+verification pass. No production-code defect remains open for this MVP scope.
 
 ## Review scope and method
 
-This read-only review covered the BandForge `AGENTS.md`, `README.md`,
-implementation roadmap, cycle-demo gate, task checklist, parent SDLC log,
-durable progress ledger, all saved Cycle 4-10 demo reports and artifacts, the
-Cycle 9 re-review, the Cycle 10 canonical/lineage/scheduler reports, and the
-Cycle 10 final acceptance re-review. The only repository file written by this
-review is this report.
-
-The review used the required skill workflow:
-
-- `agent-skills:using-agent-skills` for automatic skill discovery and scope;
-- `agent-skills:code-review-and-quality` for correctness, readability,
-  architecture, security, and performance review;
-- `superpowers:verification-before-completion` for fresh command evidence;
-- `agent-skills:browser-testing-with-devtools` for the browser-runtime attempt;
-- `agent-skills:documentation-and-adrs` for documentation/claim-boundary
-  review.
+This review covered the README, implementation roadmap, cycle-demo gate,
+public task checklist, saved Cycle 4-10 reports and artifacts, canonical
+lineage/scheduler behavior, and final verification evidence. It assessed
+correctness, readability, architecture, security boundaries, performance
+claims, and documentation consistency.
 
 ## MVP capability audit
 
@@ -57,9 +45,8 @@ bounded structural comparison/ranking evidence; they do not establish
 musical-quality, playability, or musician-preference ranking.
 
 Evidence: `reports/cycle-6-generator-demo.md`,
-`reports/cycle-7-candidate-validation-demo.md`,
-`.superpowers/sdd/task-6-generator-rereview.md`, and
-`.superpowers/sdd/task-7-candidate-review.md`.
+`reports/cycle-7-candidate-validation-demo.md`, and the current generator and
+validator tests.
 
 ### MIDI artifact and playback controls: original gate evidence was green;
 post-MVP browser repair evidence is recorded separately
@@ -73,14 +60,13 @@ committed Node regression executes returned-event scheduling, returned loop and
 tempo timing, active timer recursion, and stopped timer behavior.
 
 Evidence: `reports/cycle-8-midi-regeneration-demo.md`,
-`reports/cycle-8-candidate.mid`, `reports/cycle-10-mvp-playback-demo.md`,
-`.superpowers/sdd/task-10-lineage-and-scheduler-fix-report.md`, and
-`.superpowers/sdd/task-10-final-acceptance-rereview.md`.
+`reports/cycle-8-candidate.mid`, `reports/cycle-10-mvp-playback-demo.md`, and
+the current playback and API tests.
 
 For the original MVP gate, no browser visual or audio success was claimed: the
-then-available environment had no `agent-browser`, Chrome, Edge, or Chrome
-DevTools MCP server, so the fallback was static inspection plus committed Node,
-HTTP/API, and domain verification. A later 2026-07-22 isolated Chrome run
+then-available environment had no usable local browser runner or debugging
+connector, so the fallback was static inspection plus committed Node, HTTP/API,
+and domain verification. A later 2026-07-22 isolated Chrome run
 verified the post-MVP playback-control and sampler/cancellation repair. That
 later evidence is deliberately separate: it verifies the repair's browser
 behavior, not human listening quality or professional arrangement quality.
@@ -144,10 +130,8 @@ modes, and the explicit browser-runtime/PDF/cancellation boundaries.
 
 ### Closed: task checklist, cycle gate, and final SDLC gate
 
-The final checklist is checked, the Cycle 10 gate records 90 tests and the
-final acceptance report, and parent `portfolio_projects/SDLC_STAGE_LOG.md`
-now records Stages 18 and 19 for Cycle 10 and final MVP closure. The roadmap,
-README, task checklist, cycle evidence, and parent SDLC log now agree.
+The task checklist is checked, the Cycle 10 gate records final verification,
+and the roadmap, README, task checklist, and cycle evidence agree.
 
 The mandatory cycle gate is therefore closed with consistent implementation
 claims and explicit exclusions.
@@ -170,23 +154,19 @@ claims and explicit exclusions.
 
 ## Required closure actions
 
-1. Update only the integration documentation/SDLC files to remove the stale
-   roadmap sentence and reconcile implemented versus roadmap work.
-2. Update the task checklist and cycle gate with the final review status,
-   current verification counts, evidence paths, browser fallback, and known
-   gaps.
-3. Add the final MVP closure entry to `portfolio_projects/SDLC_STAGE_LOG.md`
-   with the honest exclusions above.
-4. Re-run the final broad review against those documentation changes. Do not
-   start later roadmap stages.
+1. Reconcile the roadmap with implemented and deferred work.
+2. Update the task checklist and cycle gate with final verification counts,
+   evidence paths, browser limitations, and known gaps.
+3. Re-run the broad review against those documentation changes. Do not start
+   later roadmap stages.
 
 The final claim is: **MVP_COMPLETE for the owner-approved portfolio-grade
 local MVP; later roadmap stages remain intentionally unstarted**.
 
 ## Post-closure master verification
 
-After the documentation closure, the master reran `python -m pytest -q` (90
-passed), Ruff, OpenAPI validation, `node --check web/editor.js`, and the real
-Cycle 10 demo. The Cycle 4, 6, 7, 8, and 9 demos were also rerun successfully;
-their saved reports and artifacts were refreshed. This confirms the closed
-gate against the final repository state.
+After the documentation closure, final verification reran `python -m pytest -q`
+(90 passed), Ruff, OpenAPI validation, `node --check web/editor.js`, and the
+real Cycle 10 demo. The Cycle 4, 6, 7, 8, and 9 demos were also rerun
+successfully; their saved reports and artifacts were refreshed. This confirms
+the closed gate against the final repository state.

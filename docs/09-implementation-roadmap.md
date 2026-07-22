@@ -30,8 +30,8 @@ The first deterministic four-piece baseline is also implemented in the domain
 layer: same source and seed reproduce the same schema-valid candidate, and hard
 source-lock/rights/schema/timing/written-and-sounding-range/polyphony findings
 block acceptance; complete lineage and collision-safe candidate IDs are
-persisted. The bounded evidence is in `reports/cycle-6-generator-demo.md` and
-`.superpowers/sdd/task-6-generator-rereview.md`. Style packs beyond the baseline,
+persisted. The bounded evidence is in `reports/cycle-6-generator-demo.md`.
+Style packs beyond the baseline,
 playability evaluation, and later regeneration modes remain outside the
 approved MVP.
 

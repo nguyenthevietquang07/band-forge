@@ -135,8 +135,6 @@ Evidence:
   was recorded, and the candidate validated against the ArrangementDocument
   schema.
 - Saved report: `reports/cycle-6-generator-demo.md`.
-- Saved fix/review reports: `.superpowers/sdd/task-6-generator-fix-report.md`
-  and `.superpowers/sdd/task-6-generator-rereview.md`.
 
 Boundaries: this is a deterministic rules baseline, not a playability claim.
 Candidate comparison, the full validator catalog, playback, scoped
@@ -160,7 +158,6 @@ Evidence:
   same-seed replay, unchanged source harmony, complete lineage, and catalog
   failure evidence.
 - Saved report: `reports/cycle-7-candidate-validation-demo.md`.
-- Task review: `.superpowers/sdd/task-7-candidate-review.md` is CLEAN.
 
 Boundaries: comparison summaries and catalog findings are structural evidence,
 not playability, quality, audio, musician preference, or launch readiness.
@@ -185,7 +182,6 @@ Evidence:
 - Saved artifacts: `reports/cycle-8-candidate.mid`,
   `reports/cycle-8-regenerated.mid`, and
   `reports/cycle-8-midi-manifest.json`.
-- Task review: `.superpowers/sdd/task-8-midi-regeneration-review.md` is CLEAN.
 
 Boundaries: this is artifact and preservation evidence, not browser playback,
 audio, musician playability, later regeneration modes, notation/packets,
@@ -210,9 +206,6 @@ Evidence:
   `reports/cycle-9-score.musicxml`,
   `reports/cycle-9-player-packet.zip`, and
   `reports/cycle-9-player-packet-manifest.json`.
-- Task implementation fix and fresh re-review are recorded in
-  `.superpowers/sdd/task-9-notation-packet-fix-report.md` and
-  `.superpowers/sdd/task-9-notation-packet-rereview.md`.
 
 Boundaries: the packet is deterministic printable/player-ready artifact
 basics, not a browser score renderer, PDF renderer, signed download service,
@@ -242,13 +235,12 @@ Evidence:
   identity, complete lineage, rights, four-track controls, arbitrary loop
   bounds, metronome, count-in, tempo override, canonical immutability, and
   browser-tool availability.
-- Final acceptance closure is recorded in
-  `.superpowers/sdd/task-10-final-acceptance-rereview.md`.
+- Final verification summary: `reports/final-mvp-review.md`.
 
 Boundaries: this is a candidate-backed local playback review surface, not
-browser automation proof, actual-audio proof, musician playability evidence,
-job cancellation/reconnect, PDF rendering, hosted deployment, or later
-roadmap work. Browser automation was unavailable in the local environment.
+actual-audio proof, musician playability evidence, job cancellation/reconnect,
+PDF rendering, hosted deployment, or later roadmap work. Browser runtime
+automation was unavailable in the original local environment.
 
 ## Portfolio-Grade MVP Gate
 
